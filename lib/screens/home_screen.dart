@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/ponto.dart';
-import '../services/ponto_service.dart';
 import '../services/camera_service.dart';
 import '../services/location_service.dart';
+import '../services/database_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,10 +15,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PontoService _pontoService = PontoService();
   final CameraService _cameraService = CameraService();
   final LocationService _locationService = LocationService();
+  final DatabaseService _dbService = DatabaseService.instance;
+  
+  List<Ponto> _pontos = [];
   bool _isProcessing = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPontos();
+  }
+
+  Future<void> _carregarPontos() async {
+    setState(() => _isLoading = true);
+    final pontos = await _dbService.listarPontos();
+    setState(() {
+      _pontos = pontos;
+      _isLoading = false;
+    });
+  }
 
   Future<void> _baterPonto() async {
     setState(() => _isProcessing = true);
@@ -44,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      // 4. Registrar o ponto com dados reais
+      // 4. Criar objeto Ponto
       final novoPonto = Ponto(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         dataHora: DateTime.now(),
@@ -53,9 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
         longitude: position.longitude,
       );
 
-      setState(() {
-        _pontoService.registrarPonto(novoPonto);
-      });
+      // 5. Salvar no Banco de Dados
+      await _dbService.inserirPonto(novoPonto);
+
+      // 6. Atualizar Lista
+      await _carregarPontos();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,8 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final pontos = _pontoService.pontos;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Controle de Ponto'),
@@ -109,29 +127,35 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Expanded(
-            child: pontos.isEmpty
-                ? const Center(child: Text('Nenhum ponto registrado.'))
-                : ListView.builder(
-                    itemCount: pontos.length,
-                    itemBuilder: (context, index) {
-                      final ponto = pontos[index];
-                      return ListTile(
-                        leading: ponto.fotoPath != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: Image.file(
-                                  File(ponto.fotoPath!),
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : const Icon(Icons.access_time),
-                        title: Text(DateFormat('dd/MM/yyyy - HH:mm:ss').format(ponto.dataHora)),
-                        subtitle: Text('Lat: ${ponto.latitude?.toStringAsFixed(4)}, Long: ${ponto.longitude?.toStringAsFixed(4)}'),
-                      );
-                    },
-                  ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _pontos.isEmpty
+                    ? const Center(child: Text('Nenhum ponto registrado.'))
+                    : RefreshIndicator(
+                        onRefresh: _carregarPontos,
+                        child: ListView.builder(
+                          itemCount: _pontos.length,
+                          itemBuilder: (context, index) {
+                            final ponto = _pontos[index];
+                            return ListTile(
+                              leading: ponto.fotoPath != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: Image.file(
+                                        File(ponto.fotoPath!),
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                                      ),
+                                    )
+                                  : const Icon(Icons.access_time),
+                              title: Text(DateFormat('dd/MM/yyyy - HH:mm:ss').format(ponto.dataHora)),
+                              subtitle: Text('Lat: ${ponto.latitude?.toStringAsFixed(4)}, Long: ${ponto.longitude?.toStringAsFixed(4)}'),
+                            );
+                          },
+                        ),
+                      ),
           ),
         ],
       ),
