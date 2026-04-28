@@ -1,11 +1,43 @@
+import 'package:geolocator/geolocator.dart';
 import '../models/ponto.dart';
+import 'camera_service.dart';
+import 'database_service.dart';
+import 'location_service.dart';
 
 class PontoService {
-  final List<Ponto> _pontos = [];
+  final CameraService _cameraService = CameraService();
+  final LocationService _locationService = LocationService();
+  final DatabaseService _dbService = DatabaseService.instance;
 
-  List<Ponto> get pontos => List.unmodifiable(_pontos);
+  /// Orquestra o fluxo de registro de ponto:
+  /// 1. Captura Foto
+  /// 2. Captura Localização
+  /// 3. Salva no Banco
+  Future<void> registrarPontoCompleto() async {
+    // 1. Captura de Foto
+    final String? fotoPath = await _cameraService.tirarFoto();
+    if (fotoPath == null) {
+      throw Exception('Operação cancelada: Foto não capturada.');
+    }
 
-  void registrarPonto(Ponto ponto) {
-    _pontos.insert(0, ponto); // Adiciona no início da lista
+    // 2. Captura de Localização
+    final Position position = await _locationService.obterLocalizacaoAtual();
+
+    // 3. Criação do Objeto
+    final novoPonto = Ponto(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      dataHora: DateTime.now(),
+      fotoPath: fotoPath,
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
+
+    // 4. Persistência
+    await _dbService.inserirPonto(novoPonto);
+  }
+
+  /// Recupera todos os pontos ordenados por data
+  Future<List<Ponto>> buscarHistoricoDePontos() async {
+    return await _dbService.listarPontos();
   }
 }
