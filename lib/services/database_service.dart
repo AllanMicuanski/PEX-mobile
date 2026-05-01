@@ -20,8 +20,9 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -30,11 +31,21 @@ class DatabaseService {
       CREATE TABLE pontos (
         id TEXT PRIMARY KEY,
         dataHora TEXT NOT NULL,
+        tipo TEXT NOT NULL DEFAULT 'entrada',
         fotoPath TEXT,
         latitude REAL,
         longitude REAL
       )
     ''');
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Adiciona a coluna 'tipo' aos dados existentes
+      await db.execute(
+        'ALTER TABLE pontos ADD COLUMN tipo TEXT NOT NULL DEFAULT "entrada"',
+      );
+    }
   }
 
   Future<void> inserirPonto(Ponto ponto) async {
