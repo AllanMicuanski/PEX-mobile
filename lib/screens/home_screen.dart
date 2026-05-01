@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final PontoService _pontoService = PontoService();
-  
+
   List<Ponto> _historico = [];
   bool _estaProcessando = false;
   bool _carregandoHistorico = true;
@@ -36,13 +36,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleRegistrarPonto() async {
     setState(() => _estaProcessando = true);
-    
+
     try {
       await _pontoService.registrarPontoCompleto();
       await _carregarDados();
       _mostrarMensagem('Ponto registrado com sucesso!');
     } catch (e) {
-      _mostrarMensagem(e.toString().replaceAll('Exception: ', ''), isError: true);
+      _mostrarMensagem(
+        e.toString().replaceAll('Exception: ', ''),
+        isError: true,
+      );
     } finally {
       setState(() => _estaProcessando = false);
     }
@@ -88,8 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('BATER PONTO'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
               ),
       ),
@@ -125,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: _carregarDados,
         child: ListView.separated(
           itemCount: _historico.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, index) => _PontoTile(ponto: _historico[index]),
         ),
       ),
@@ -176,7 +184,7 @@ class _PontoTile extends StatelessWidget {
         width: 60,
         height: 60,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           width: 60,
           height: 60,
           color: Colors.grey[200],
