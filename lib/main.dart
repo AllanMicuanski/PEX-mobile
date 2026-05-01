@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/mapa_screen.dart';
 import 'screens/historico_screen.dart';
 
 void main() {
@@ -33,7 +34,11 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [const HomeScreen(), const HistoricoScreen()];
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const MapaScreen(),
+    const HistoricoScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +47,16 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() => _selectedIndex = index);
+          setState(() {
+            _selectedIndex = index;
+          });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.location_on),
+            label: 'Localização',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'Histórico',

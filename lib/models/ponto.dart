@@ -7,6 +7,7 @@ class Ponto {
   final String? fotoPath;
   final double? latitude;
   final double? longitude;
+  final TipoPonto tipo;
 
   Ponto({
     required this.id,
@@ -15,6 +16,7 @@ class Ponto {
     this.fotoPath,
     this.latitude,
     this.longitude,
+    this.tipo = TipoPonto.entrada,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,6 +27,7 @@ class Ponto {
       'fotoPath': fotoPath,
       'latitude': latitude,
       'longitude': longitude,
+      'tipo': tipo.toString().split('.').last,
     };
   }
 
@@ -39,6 +42,22 @@ class Ponto {
       fotoPath: map['fotoPath'],
       latitude: map['latitude'],
       longitude: map['longitude'],
+      tipo: _parseTipoPonto(map['tipo']),
     );
+  }
+
+  static TipoPonto _parseTipoPonto(String? value) {
+    switch (value) {
+      case 'entrada':
+        return TipoPonto.entrada;
+      case 'almoco':
+        return TipoPonto.almoco;
+      case 'retorno':
+        return TipoPonto.retorno;
+      case 'saida':
+        return TipoPonto.saida;
+      default:
+        return TipoPonto.entrada;
+    }
   }
 }

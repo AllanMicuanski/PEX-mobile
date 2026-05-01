@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/ponto.dart';
 import '../services/ponto_service.dart';
 import '../services/location_service.dart';
+import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
 
@@ -19,8 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Ponto> _today = [];
   bool _estaProcessando = false;
-  bool _carregandoHistorico = true;
   bool _gpsValido = false;
+  String _horasTrabalhadas = '0h 00min';
 
   @override
   void initState() {
@@ -39,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _carregarDados() async {
-    setState(() => _carregandoHistorico = true);
     try {
       final pontos = await _pontoService.buscarHistoricoDePontos();
       final hoje = DateTime.now();
@@ -48,9 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
             p.dataHora.month == hoje.month &&
             p.dataHora.day == hoje.day;
       }).toList();
-      setState(() => _today = registrosHoje);
+      setState(() {
+        _today = registrosHoje;
+        _horasTrabalhadas = JornadaService.calcularHorasDia(_today);
+      });
     } finally {
-      setState(() => _carregandoHistorico = false);
+      // reload completed
     }
   }
 
@@ -93,20 +96,27 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        children: [
-          // Header com relógio e GPS
-          _buildHeader(),
-          const SizedBox(height: 48),
+      body: RefreshIndicator(
+        onRefresh: _carregarDados,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          children: [
+            // Header com relógio e GPS
+            _buildHeader(),
+            const SizedBox(height: 32),
 
-          // Botão grande circular de bater ponto
-          _buildMainButton(),
-          const SizedBox(height: 48),
+            // Botão grande circular
+            _buildMainButton(),
+            const SizedBox(height: 40),
 
-          // Registros do dia
-          _buildTodayRecords(),
-        ],
+            // 4 slots do dia
+            _buildSlotsDia(),
+            const SizedBox(height: 32),
+
+            // Horas trabalhadas
+            _buildHorasTrabalhadas(),
+          ],
+        ),
       ),
     );
   }
@@ -114,17 +124,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
+<<<<<<< Updated upstream
         // Relógio
         const ClockWidget(),
         const SizedBox(height: 24),
 
         // GPS Indicator
         GPSIndicator(isValid: _gpsValido),
+=======
+        const ClockWidget(),
+        const SizedBox(height: 24),
+        const GPSIndicator(),
+>>>>>>> Stashed changes
       ],
     );
   }
 
   Widget _buildMainButton() {
+<<<<<<< Updated upstream
+=======
+    final tempoSaida = JornadaService.isHorarioDeSaida(DateTime.now());
+    final corBotao = tempoSaida ? Colors.red : Colors.blue;
+
+>>>>>>> Stashed changes
     return Center(
       child: GestureDetector(
         onTap: _estaProcessando ? null : _handleRegistrarPonto,
@@ -133,10 +155,17 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+<<<<<<< Updated upstream
             color: Colors.blue[600],
             boxShadow: [
               BoxShadow(
                 color: Colors.blue.withValues(alpha: 0.3),
+=======
+            color: corBotao[600],
+            boxShadow: [
+              BoxShadow(
+                color: corBotao.withValues(alpha: 0.3),
+>>>>>>> Stashed changes
                 blurRadius: 16,
                 spreadRadius: 4,
               ),
@@ -149,15 +178,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
+<<<<<<< Updated upstream
                         Icons.check_circle_outline,
+=======
+                        tempoSaida ? Icons.logout : Icons.check_circle_outline,
+>>>>>>> Stashed changes
                         size: 64,
                         color: Colors.white,
                       ),
                       const SizedBox(height: 8),
+<<<<<<< Updated upstream
                       const Text(
                         'BATER\nPONTO',
                         textAlign: TextAlign.center,
                         style: TextStyle(
+=======
+                      Text(
+                        tempoSaida ? 'SAÍDA' : 'ENTRADA',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+>>>>>>> Stashed changes
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -167,10 +207,104 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           ),
         ),
+<<<<<<< Updated upstream
+=======
       ),
     );
   }
 
+  Widget _buildSlotsDia() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Jornada do Dia',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          children: JornadaService.horariosFixos
+              .map((horario) => _buildSlotCard(horario))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlotCard(HorarioJornada horario) {
+    Ponto? pontoRegistrado;
+    try {
+      pontoRegistrado = _today.firstWhere((p) => p.tipo == horario.tipo);
+    } catch (_) {
+      pontoRegistrado = null;
+    }
+
+    final temRegistro = pontoRegistrado != null;
+    final status = temRegistro
+        ? JornadaService.statusPonto(pontoRegistrado)
+        : 'pendente';
+
+    Color corFundo = Colors.grey[100]!;
+    Color corTexto = Colors.grey[600]!;
+    IconData icone = Icons.schedule;
+
+    if (temRegistro) {
+      if (status == 'no_horario') {
+        corFundo = Colors.green[50]!;
+        corTexto = Colors.green[700]!;
+        icone = Icons.check_circle;
+      } else if (status == 'atrasado') {
+        corFundo = Colors.orange[50]!;
+        corTexto = Colors.orange[700]!;
+        icone = Icons.schedule;
+      }
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: corFundo,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: corTexto, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icone, color: corTexto, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            horario.label,
+            style: TextStyle(
+              fontSize: 12,
+              color: corTexto,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            horario.toString(),
+            style: TextStyle(
+              fontSize: 14,
+              color: corTexto,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (temRegistro)
+            Text(
+              DateFormat('HH:mm').format(pontoRegistrado.dataHora),
+              style: TextStyle(fontSize: 11, color: corTexto),
+            ),
+        ],
+>>>>>>> Stashed changes
+      ),
+    );
+  }
+
+<<<<<<< Updated upstream
   Widget _buildTodayRecords() {
     if (_carregandoHistorico) {
       return const Center(child: CircularProgressIndicator());
@@ -253,6 +387,39 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+=======
+  Widget _buildHorasTrabalhadas() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue[200]!),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Horas Trabalhadas',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _horasTrabalhadas,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[700],
+                ),
+              ),
+            ],
+          ),
+          Icon(Icons.timer, size: 48, color: Colors.blue[300]),
+        ],
+>>>>>>> Stashed changes
       ),
     );
   }
