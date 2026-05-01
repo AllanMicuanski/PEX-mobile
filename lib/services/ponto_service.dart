@@ -27,6 +27,7 @@ class PontoService {
     final novoPonto = Ponto(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       dataHora: DateTime.now(),
+      tipo: TipoPonto.entrada, // TODO: Definir tipo baseado na hora do dia
       fotoPath: fotoPath,
       latitude: position.latitude,
       longitude: position.longitude,
