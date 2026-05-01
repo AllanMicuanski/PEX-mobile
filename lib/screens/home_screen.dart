@@ -124,29 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-<<<<<<< Updated upstream
-        // Relógio
         const ClockWidget(),
         const SizedBox(height: 24),
-
-        // GPS Indicator
         GPSIndicator(isValid: _gpsValido),
-=======
-        const ClockWidget(),
-        const SizedBox(height: 24),
-        const GPSIndicator(),
->>>>>>> Stashed changes
       ],
     );
   }
 
   Widget _buildMainButton() {
-<<<<<<< Updated upstream
-=======
     final tempoSaida = JornadaService.isHorarioDeSaida(DateTime.now());
     final corBotao = tempoSaida ? Colors.red : Colors.blue;
 
->>>>>>> Stashed changes
     return Center(
       child: GestureDetector(
         onTap: _estaProcessando ? null : _handleRegistrarPonto,
@@ -155,17 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-<<<<<<< Updated upstream
-            color: Colors.blue[600],
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withValues(alpha: 0.3),
-=======
             color: corBotao[600],
             boxShadow: [
               BoxShadow(
                 color: corBotao.withValues(alpha: 0.3),
->>>>>>> Stashed changes
                 blurRadius: 16,
                 spreadRadius: 4,
               ),
@@ -178,26 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-<<<<<<< Updated upstream
-                        Icons.check_circle_outline,
-=======
                         tempoSaida ? Icons.logout : Icons.check_circle_outline,
->>>>>>> Stashed changes
                         size: 64,
                         color: Colors.white,
                       ),
                       const SizedBox(height: 8),
-<<<<<<< Updated upstream
-                      const Text(
-                        'BATER\nPONTO',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-=======
                       Text(
                         tempoSaida ? 'SAÍDA' : 'ENTRADA',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
->>>>>>> Stashed changes
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -207,8 +177,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           ),
         ),
-<<<<<<< Updated upstream
-=======
       ),
     );
   }
@@ -299,95 +267,10 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 11, color: corTexto),
             ),
         ],
->>>>>>> Stashed changes
       ),
     );
   }
 
-<<<<<<< Updated upstream
-  Widget _buildTodayRecords() {
-    if (_carregandoHistorico) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Registros de Hoje',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        if (_today.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                'Nenhum registro ainda',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          )
-        else
-          ..._today.map((ponto) => _buildTodayTile(ponto)),
-      ],
-    );
-  }
-
-  Widget _buildTodayTile(Ponto ponto) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-          border: Border(left: BorderSide(color: Colors.blue[600]!, width: 4)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  DateFormat('HH:mm').format(ponto.dataHora),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 20,
-                      color: Colors.green[600],
-                    ),
-                    const SizedBox(width: 4),
-                    if (ponto.fotoPath != null)
-                      const Text(
-                        'Foto ✓',
-                        style: TextStyle(fontSize: 12, color: Colors.green),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  'GPS ✓',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ],
-        ),
-=======
   Widget _buildHorasTrabalhadas() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -419,7 +302,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Icon(Icons.timer, size: 48, color: Colors.blue[300]),
         ],
->>>>>>> Stashed changes
       ),
     );
   }
