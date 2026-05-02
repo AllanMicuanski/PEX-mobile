@@ -25,6 +25,11 @@ class _ClockWidgetState extends State<ClockWidget> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final formattedTime = DateFormat('HH:mm:ss').format(_currentTime);
 

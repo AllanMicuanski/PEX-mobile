@@ -22,6 +22,17 @@ class LocationService {
       );
     }
 
-    return await Geolocator.getCurrentPosition();
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 30),
+        ),
+      );
+    } catch (e) {
+      throw Exception(
+        'Erro ao obter GPS (timeout ou indisponível). Tente novamente em uma área aberta.',
+      );
+    }
   }
 }

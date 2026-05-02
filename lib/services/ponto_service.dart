@@ -3,6 +3,7 @@ import '../models/ponto.dart';
 import 'camera_service.dart';
 import 'database_service.dart';
 import 'location_service.dart';
+import 'jornada_service.dart';
 
 class PontoService {
   final CameraService _cameraService = CameraService();
@@ -24,10 +25,11 @@ class PontoService {
     final Position position = await _locationService.obterLocalizacaoAtual();
 
     // 3. Criação do Objeto
+    final agora = DateTime.now();
     final novoPonto = Ponto(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      dataHora: DateTime.now(),
-      tipo: TipoPonto.entrada, // TODO: Definir tipo baseado na hora do dia
+      id: agora.millisecondsSinceEpoch.toString(),
+      dataHora: agora,
+      tipo: JornadaService.detectarTipoPonto(agora),
       fotoPath: fotoPath,
       latitude: position.latitude,
       longitude: position.longitude,
