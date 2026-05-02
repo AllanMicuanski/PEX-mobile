@@ -8,6 +8,7 @@ import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
 import '../config/theme.dart';
 import '../services/ponto_service.dart' show Empresa;
+import 'confirmacao_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,7 +85,17 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       await _pontoService.registrarPontoCompleto(homeOffice: _homeOffice);
       await _carregarDados();
-      _mostrarMensagem('✅ Ponto registrado com sucesso!');
+      
+      // Mostra modal de confirmação
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const ConfirmacaoScreen(),
+      ).then((_) {
+        // Refresh após fechar modal
+        _verificarGPS();
+      });
     } catch (e) {
       _mostrarMensagem(
         e.toString().replaceAll('Exception: ', ''),

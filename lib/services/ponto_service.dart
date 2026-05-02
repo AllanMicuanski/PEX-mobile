@@ -6,11 +6,6 @@ import 'database_service.dart';
 import 'location_service.dart';
 import 'jornada_service.dart';
 
-class Empresa {
-  static const double latitude = -26.2746;
-  static const double longitude = -48.8426;
-}
-
 class PontoService {
   final CameraService _cameraService = CameraService();
   final LocationService _locationService = LocationService();
