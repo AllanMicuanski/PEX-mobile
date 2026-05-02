@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/ponto.dart';
 import '../services/ponto_service.dart';
+import '../services/location_service.dart';
 import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Inicializa o serviço de localização
+    LocationService.initialize();
     _carregarDados();
     _verificarGPS();
   }
@@ -39,9 +42,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final valido = await _pontoService.validarGPS();
-      setState(() => _gpsValido = valido);
-    } catch (_) {
-      setState(() => _gpsValido = false);
+      if (mounted) {
+        setState(() => _gpsValido = valido);
+      }
+    } catch (e) {
+      print('GPS validation error: $e');
+      if (mounted) {
+        setState(() => _gpsValido = false);
+      }
     }
   }
 
