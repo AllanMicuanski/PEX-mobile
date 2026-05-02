@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -40,12 +40,8 @@ class DatabaseService {
   }
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Adiciona a coluna 'tipo' aos dados existentes
-      await db.execute(
-        'ALTER TABLE pontos ADD COLUMN tipo TEXT NOT NULL DEFAULT "entrada"',
-      );
-    }
+    // Versão 3: remove a migração incorreta que tenta duplicar coluna 'tipo'
+    // A coluna já existe na tabela original, então não precisa fazer nada
   }
 
   Future<void> inserirPonto(Ponto ponto) async {
