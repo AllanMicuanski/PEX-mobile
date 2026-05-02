@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       await _pontoService.registrarPontoCompleto(homeOffice: _homeOffice);
       await _carregarDados();
-      
+
       // Mostra modal de confirmação
       if (!mounted) return;
       showDialog(

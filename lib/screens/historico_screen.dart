@@ -46,44 +46,42 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       ),
       body: _carregando
           ? const Center(
-              child: CircularProgressIndicator(
-                color: SizebayColors.coral,
-              ),
+              child: CircularProgressIndicator(color: SizebayColors.coral),
             )
           : _pontos.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.history,
-                        size: 64,
-                        color: SizebayColors.cinzaMedio,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Nenhum registro encontrado',
-                        style: TextStyle(
-                          color: SizebayColors.cinzaMedio,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 64,
+                    color: SizebayColors.cinzaMedio,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _carregarHistorico,
-                  color: SizebayColors.coral,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: _pontos.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final ponto = _pontos[index];
-                      return _buildPontoTile(ponto);
-                    },
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Nenhum registro encontrado',
+                    style: TextStyle(
+                      color: SizebayColors.cinzaMedio,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _carregarHistorico,
+              color: SizebayColors.coral,
+              child: ListView.separated(
+                padding: const EdgeInsets.all(12),
+                itemCount: _pontos.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final ponto = _pontos[index];
+                  return _buildPontoTile(ponto);
+                },
+              ),
+            ),
     );
   }
 
@@ -91,7 +89,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
     final data = DateFormat('dd/MM/yyyy').format(ponto.dataHora);
     final hora = DateFormat('HH:mm').format(ponto.dataHora);
     final tipo = ponto.tipo.toString().split('.').last;
-    
+
     Color corTipo = SizebayColors.coral;
     IconData icone = Icons.login;
     if (tipo == 'almoco') {
@@ -118,7 +116,10 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         leading: Container(
           width: 50,
           height: 50,
@@ -127,9 +128,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
             shape: BoxShape.circle,
             border: Border.all(color: corTipo, width: 2),
           ),
-          child: Center(
-            child: Icon(icone, color: corTipo, size: 24),
-          ),
+          child: Center(child: Icon(icone, color: corTipo, size: 24)),
         ),
         title: Text(
           '$data - $hora',
