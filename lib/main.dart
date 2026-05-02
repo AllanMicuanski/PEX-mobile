@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'config/theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/mapa_screen.dart';
 import 'screens/historico_screen.dart';
@@ -15,10 +16,7 @@ class PontoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Controle de Ponto',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: getSizebayTheme(),
       home: const MainNavigation(),
     );
   }

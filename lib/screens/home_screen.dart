@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/ponto.dart';
 import '../services/ponto_service.dart';
-import '../services/location_service.dart';
 import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
+import '../config/theme.dart';
+import '../services/ponto_service.dart' show Empresa;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +17,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final PontoService _pontoService = PontoService();
-  final LocationService _locationService = LocationService();
 
   List<Ponto> _today = [];
   bool _estaProcessando = false;
   bool _gpsValido = false;
+  bool _homeOffice = false;
   String _horasTrabalhadas = '0h 00min';
 
   @override
@@ -31,9 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _verificarGPS() async {
-    try {
-      await _locationService.obterLocalizacaoAtual();
+    if (_homeOffice) {
       setState(() => _gpsValido = true);
+      return;
+    }
+
+    try {
+      final valido = await _pontoService.validarGPS();
+      setState(() => _gpsValido = valido);
     } catch (_) {
       setState(() => _gpsValido = false);
     }
@@ -58,16 +64,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleRegistrarPonto() async {
-    if (!_gpsValido) {
-      _mostrarMensagem('GPS não validado!', isError: true);
+    if (!_gpsValido && !_homeOffice) {
+      _mostrarMensagem(
+        '📍 GPS não validado! Você precisa estar a 500m da empresa.',
+        isError: true,
+      );
       return;
     }
 
     setState(() => _estaProcessando = true);
     try {
-      await _pontoService.registrarPontoCompleto();
+      await _pontoService.registrarPontoCompleto(homeOffice: _homeOffice);
       await _carregarDados();
-      _mostrarMensagem('Ponto registrado com sucesso!');
+      _mostrarMensagem('✅ Ponto registrado com sucesso!');
     } catch (e) {
       _mostrarMensagem(
         e.toString().replaceAll('Exception: ', ''),
@@ -83,7 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensagem),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        backgroundColor: isError ? Colors.red : SizebayColors.coral,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -91,18 +103,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: SizebayColors.offWhite,
       appBar: AppBar(
         title: const Text('Controle de Ponto'),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: RefreshIndicator(
         onRefresh: _carregarDados,
+        color: SizebayColors.coral,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           children: [
             // Header com relógio e GPS
             _buildHeader(),
+            const SizedBox(height: 24),
+
+            // Flag Home Office
+            _buildHomeOfficeToggle(),
             const SizedBox(height: 32),
 
             // Botão grande circular
@@ -126,35 +145,133 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         const ClockWidget(),
         const SizedBox(height: 24),
-        GPSIndicator(isValid: _gpsValido),
+        if (!_homeOffice) GPSIndicator(isValid: _gpsValido),
+        if (_homeOffice)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: SizebayColors.azulClaro.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: SizebayColors.azulClaro, width: 2),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.home, color: SizebayColors.azulClaro, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Modo Home Office Ativado',
+                  style: TextStyle(
+                    color: SizebayColors.azulClaro,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
+    );
+  }
+
+  Widget _buildHomeOfficeToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _homeOffice ? SizebayColors.coral : SizebayColors.bege,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: SizebayColors.coral.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Home Office',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: SizebayColors.preto,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Desativar validação GPS',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: SizebayColors.cinzaMedio,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Transform.scale(
+            scale: 1.2,
+            child: Switch(
+              value: _homeOffice,
+              onChanged: (value) {
+                setState(() => _homeOffice = value);
+                _verificarGPS();
+              },
+              activeColor: SizebayColors.coral,
+              activeTrackColor: SizebayColors.coral.withOpacity(0.3),
+              inactiveThumbColor: SizebayColors.cinzaMedio,
+              inactiveTrackColor: SizebayColors.cinzaMedio.withOpacity(0.2),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildMainButton() {
     final tempoSaida = JornadaService.isHorarioDeSaida(DateTime.now());
-    final corBotao = tempoSaida ? Colors.red : Colors.blue;
 
     return Center(
       child: GestureDetector(
-        onTap: _estaProcessando ? null : _handleRegistrarPonto,
+        onTap: _estaProcessando || (!_gpsValido && !_homeOffice)
+            ? null
+            : _handleRegistrarPonto,
         child: Container(
           width: 200,
           height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: corBotao[600],
+            gradient: LinearGradient(
+              colors: tempoSaida
+                  ? [Colors.red[600]!, Colors.red[400]!]
+                  : [SizebayColors.coral, const Color(0xFFF7663D)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             boxShadow: [
               BoxShadow(
-                color: corBotao.withValues(alpha: 0.3),
-                blurRadius: 16,
+                color: (tempoSaida ? Colors.red : SizebayColors.coral)
+                    .withOpacity(0.4),
+                blurRadius: 20,
                 spreadRadius: 4,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Center(
             child: _estaProcessando
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 3,
+                  )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -171,6 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
@@ -187,7 +305,11 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         const Text(
           'Jornada do Dia',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: SizebayColors.preto,
+          ),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -217,27 +339,34 @@ class _HomeScreenState extends State<HomeScreen> {
         ? JornadaService.statusPonto(pontoRegistrado)
         : 'pendente';
 
-    Color corFundo = Colors.grey[100]!;
-    Color corTexto = Colors.grey[600]!;
+    Color corBorda = SizebayColors.bege;
+    Color corTexto = SizebayColors.cinzaMedio;
     IconData icone = Icons.schedule;
 
     if (temRegistro) {
       if (status == 'no_horario') {
-        corFundo = Colors.green[50]!;
-        corTexto = Colors.green[700]!;
+        corBorda = SizebayColors.verde;
+        corTexto = SizebayColors.verde;
         icone = Icons.check_circle;
       } else if (status == 'atrasado') {
-        corFundo = Colors.orange[50]!;
-        corTexto = Colors.orange[700]!;
+        corBorda = SizebayColors.laranja;
+        corTexto = SizebayColors.laranja;
         icone = Icons.schedule;
       }
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: corFundo,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: corTexto, width: 1),
+        border: Border.all(color: corBorda, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: corBorda.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -275,9 +404,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue[50],
+        gradient: LinearGradient(
+          colors: [
+            SizebayColors.azulClaro.withOpacity(0.2),
+            SizebayColors.bege.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue[200]!),
+        border: Border.all(color: SizebayColors.azulClaro, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: SizebayColors.azulClaro.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,20 +430,35 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 'Horas Trabalhadas',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: SizebayColors.cinzaMedio,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 _horasTrabalhadas,
-                style: TextStyle(
-                  fontSize: 24,
+                style: const TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
+                  color: SizebayColors.coral,
                 ),
               ),
             ],
           ),
-          Icon(Icons.timer, size: 48, color: Colors.blue[300]),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: SizebayColors.coral.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.timer,
+              size: 48,
+              color: SizebayColors.coral,
+            ),
+          ),
         ],
       ),
     );

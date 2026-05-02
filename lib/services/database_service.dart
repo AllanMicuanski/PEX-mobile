@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -34,14 +34,23 @@ class DatabaseService {
         tipo TEXT NOT NULL DEFAULT 'entrada',
         fotoPath TEXT,
         latitude REAL,
-        longitude REAL
+        longitude REAL,
+        homeOffice INTEGER DEFAULT 0
       )
     ''');
   }
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    // Versão 3: remove a migração incorreta que tenta duplicar coluna 'tipo'
-    // A coluna já existe na tabela original, então não precisa fazer nada
+    if (oldVersion < 4) {
+      // Adiciona coluna homeOffice se não existir
+      try {
+        await db.execute(
+          'ALTER TABLE pontos ADD COLUMN homeOffice INTEGER DEFAULT 0',
+        );
+      } catch (_) {
+        // Coluna já existe, ignorar erro
+      }
+    }
   }
 
   Future<void> inserirPonto(Ponto ponto) async {

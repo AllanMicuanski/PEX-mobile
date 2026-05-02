@@ -7,6 +7,7 @@ class Ponto {
   final String? fotoPath;
   final double? latitude;
   final double? longitude;
+  final bool homeOffice;
 
   Ponto({
     required this.id,
@@ -15,6 +16,7 @@ class Ponto {
     this.fotoPath,
     this.latitude,
     this.longitude,
+    this.homeOffice = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,6 +27,7 @@ class Ponto {
       'fotoPath': fotoPath,
       'latitude': latitude,
       'longitude': longitude,
+      'homeOffice': homeOffice ? 1 : 0,
     };
   }
 
@@ -39,6 +42,7 @@ class Ponto {
       fotoPath: map['fotoPath'],
       latitude: map['latitude'],
       longitude: map['longitude'],
+      homeOffice: (map['homeOffice'] ?? 0) == 1,
     );
   }
 }
