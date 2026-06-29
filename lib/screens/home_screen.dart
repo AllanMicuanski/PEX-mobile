@@ -5,10 +5,25 @@ import '../services/ponto_service.dart';
 import '../services/location_service.dart';
 import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
-import '../widgets/gps_indicator.dart';
 import '../widgets/app_card.dart';
+import '../widgets/status_chip.dart';
 import '../config/theme.dart';
 import 'confirmacao_screen.dart';
+
+const List<String> _mesesAbrev = [
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
+];
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicializa o serviço de localização
     LocationService.initialize();
     _carregarDados();
     _verificarGPS();
@@ -55,21 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _carregarDados() async {
-    try {
-      final pontos = await _pontoService.buscarHistoricoDePontos();
-      final hoje = DateTime.now();
-      final registrosHoje = pontos.where((p) {
-        return p.dataHora.year == hoje.year &&
-            p.dataHora.month == hoje.month &&
-            p.dataHora.day == hoje.day;
-      }).toList();
-      setState(() {
-        _today = registrosHoje;
-        _horasTrabalhadas = JornadaService.calcularHorasDia(_today);
-      });
-    } finally {
-      // reload completed
-    }
+    final pontos = await _pontoService.buscarHistoricoDePontos();
+    final hoje = DateTime.now();
+    final registrosHoje = pontos.where((p) {
+      return p.dataHora.year == hoje.year &&
+          p.dataHora.month == hoje.month &&
+          p.dataHora.day == hoje.day;
+    }).toList();
+    if (!mounted) return;
+    setState(() {
+      _today = registrosHoje;
+      _horasTrabalhadas = JornadaService.calcularHorasDia(_today);
+    });
   }
 
   Future<void> _handleRegistrarPonto() async {
@@ -86,23 +97,19 @@ class _HomeScreenState extends State<HomeScreen> {
       await _pontoService.registrarPontoCompleto(homeOffice: _homeOffice);
       await _carregarDados();
 
-      // Mostra modal de confirmação
       if (!mounted) return;
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const ConfirmacaoScreen(),
-      ).then((_) {
-        // Refresh após fechar modal
-        _verificarGPS();
-      });
+      ).then((_) => _verificarGPS());
     } catch (e) {
       _mostrarMensagem(
         e.toString().replaceAll('Exception: ', ''),
         isError: true,
       );
     } finally {
-      setState(() => _estaProcessando = false);
+      if (mounted) setState(() => _estaProcessando = false);
     }
   }
 
@@ -119,124 +126,101 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Ponto? _pontoDoHorario(HorarioJornada horario) {
+    final registros = _today.where((p) => p.tipo == horario.tipo);
+    return registros.isEmpty ? null : registros.first;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SizebayColors.offWhite,
-      appBar: AppBar(
-        title: const Text('Controle de Ponto'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Controle de Ponto')),
       body: RefreshIndicator(
         onRefresh: _carregarDados,
-        color: SizebayColors.coral,
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
-            // Header com relógio e GPS
-            _buildHeader(),
-            const SizedBox(height: 24),
-
-            // Flag Home Office
-            _buildHomeOfficeToggle(),
-            const SizedBox(height: 32),
-
-            // Botão grande circular
+            _buildHeroCard(),
+            const SizedBox(height: 28),
             _buildMainButton(),
-            const SizedBox(height: 40),
-
-            // 4 slots do dia
-            _buildSlotsDia(),
-            const SizedBox(height: 32),
-
-            // Horas trabalhadas
-            _buildHorasTrabalhadas(),
+            const SizedBox(height: 24),
+            _buildHomeOfficeToggle(),
+            const SizedBox(height: 28),
+            _buildJornadaCard(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        const ClockWidget(),
-        const SizedBox(height: 24),
-        if (!_homeOffice) GPSIndicator(isValid: _gpsValido),
-        if (_homeOffice)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: SizebayColors.azulClaro.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: SizebayColors.azulClaro, width: 2),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.home, color: SizebayColors.azulClaro, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Modo Home Office Ativado',
-                  style: TextStyle(
-                    color: SizebayColors.azulClaro,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
+  Widget _buildGpsChip() {
+    if (_homeOffice) {
+      return const StatusChip(
+        color: SizebayColors.azul,
+        label: 'Home office',
+        icon: Icons.home_rounded,
+      );
+    }
+    return _gpsValido
+        ? const StatusChip(
+            color: SizebayColors.verde,
+            label: 'No raio',
+            icon: Icons.location_on,
+          )
+        : const StatusChip(
+            color: SizebayColors.vermelho,
+            label: 'Fora do raio',
+            icon: Icons.location_off,
+          );
   }
 
-  Widget _buildHomeOfficeToggle() {
+  Widget _buildHeroCard() {
+    final scheme = Theme.of(context).colorScheme;
+    final agora = DateTime.now();
+    final dataLabel = '${agora.day} de ${_mesesAbrev[agora.month - 1]}';
+    final proximo = JornadaService.proximoHorario(_today);
+
     return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      borderColor: _homeOffice ? SizebayColors.coral : SizebayColors.bege,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Home Office',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: SizebayColors.preto,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                dataLabel,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Desativar validação GPS',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: SizebayColors.cinzaMedio,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Transform.scale(
-            scale: 1.2,
-            child: Switch(
-              value: _homeOffice,
-              onChanged: (value) {
-                setState(() => _homeOffice = value);
-                _verificarGPS();
-              },
-              activeThumbColor: SizebayColors.coral,
-              activeTrackColor: SizebayColors.coral.withValues(alpha: 0.3),
-              inactiveThumbColor: SizebayColors.cinzaMedio,
-              inactiveTrackColor: SizebayColors.cinzaMedio.withValues(
-                alpha: 0.2,
               ),
-            ),
+              _buildGpsChip(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Center(child: ClockWidget()),
+          const SizedBox(height: 20),
+          Divider(color: scheme.outlineVariant, height: 1),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(
+                proximo != null
+                    ? Icons.schedule
+                    : Icons.check_circle_outline_rounded,
+                size: 20,
+                color: proximo != null ? scheme.primary : SizebayColors.verde,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  proximo != null
+                      ? 'Próximo ponto: ${proximo.label} às $proximo'
+                      : 'Todos os pontos de hoje registrados',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -257,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ? [SizebayColors.cinzaMedio, SizebayColors.cinzaMedio]
         : tempoSaida
         ? [SizebayColors.vermelho, const Color(0xFFFF8A85)]
-        : [SizebayColors.coral, const Color(0xFFF7663D)];
+        : [SizebayColors.coral, SizebayColors.coralClaro];
 
     return Center(
       child: Semantics(
@@ -337,156 +321,125 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSlotsDia() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Jornada do Dia',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: SizebayColors.preto,
-          ),
-        ),
-        const SizedBox(height: 16),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          children: JornadaService.horariosFixos
-              .map((horario) => _buildSlotCard(horario))
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSlotCard(HorarioJornada horario) {
-    Ponto? pontoRegistrado;
-    try {
-      pontoRegistrado = _today.firstWhere((p) => p.tipo == horario.tipo);
-    } catch (_) {
-      pontoRegistrado = null;
-    }
-
-    final temRegistro = pontoRegistrado != null;
-    final status = temRegistro
-        ? JornadaService.statusPonto(pontoRegistrado)
-        : 'pendente';
-
-    Color corBorda = SizebayColors.bege;
-    Color corTexto = SizebayColors.cinzaMedio;
-    IconData icone = Icons.schedule;
-
-    if (temRegistro) {
-      if (status == 'no_horario') {
-        corBorda = SizebayColors.verde;
-        corTexto = SizebayColors.verde;
-        icone = Icons.check_circle;
-      } else if (status == 'atrasado') {
-        corBorda = SizebayColors.laranja;
-        corTexto = SizebayColors.laranja;
-        icone = Icons.schedule;
-      }
-    }
-
+  Widget _buildHomeOfficeToggle() {
+    final scheme = Theme.of(context).colorScheme;
     return AppCard(
-      borderColor: corBorda,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
         children: [
-          Icon(icone, color: corTexto, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            horario.label,
-            style: TextStyle(
-              fontSize: 12,
-              color: corTexto,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Home office',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Registrar sem validar o GPS',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            horario.toString(),
-            style: TextStyle(
-              fontSize: 14,
-              color: corTexto,
-              fontWeight: FontWeight.bold,
-            ),
+          Switch(
+            value: _homeOffice,
+            onChanged: (value) {
+              setState(() => _homeOffice = value);
+              _verificarGPS();
+            },
           ),
-          if (temRegistro)
-            Text(
-              DateFormat('HH:mm').format(pontoRegistrado.dataHora),
-              style: TextStyle(fontSize: 11, color: corTexto),
-            ),
         ],
       ),
     );
   }
 
-  Widget _buildHorasTrabalhadas() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            SizebayColors.azulClaro.withValues(alpha: 0.2),
-            SizebayColors.bege.withValues(alpha: 0.1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: SizebayColors.azulClaro, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: SizebayColors.azulClaro.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildJornadaCard() {
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Horas Trabalhadas',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: SizebayColors.cinzaMedio,
-                  fontWeight: FontWeight.w500,
-                ),
+                'Jornada de hoje',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 8),
               Text(
                 _horasTrabalhadas,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: SizebayColors.coral,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: SizebayColors.coral.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.timer,
-              size: 48,
-              color: SizebayColors.coral,
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: JornadaService.horariosFixos
+                .map((horario) => _buildTimelineNode(horario))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineNode(HorarioJornada horario) {
+    final scheme = Theme.of(context).colorScheme;
+    final ponto = _pontoDoHorario(horario);
+    final temRegistro = ponto != null;
+
+    Color cor = scheme.onSurfaceVariant;
+    IconData icone = Icons.circle_outlined;
+
+    if (temRegistro) {
+      final status = JornadaService.statusPonto(ponto);
+      if (status == 'atrasado') {
+        cor = SizebayColors.laranja;
+        icone = Icons.schedule;
+      } else {
+        cor = SizebayColors.verde;
+        icone = Icons.check_circle;
+      }
+    }
+
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icone, color: cor, size: 26),
+          const SizedBox(height: 8),
+          Text(
+            horario.label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 11,
+              color: scheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            horario.toString(),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (temRegistro)
+            Text(
+              DateFormat('HH:mm').format(ponto.dataHora),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 11, color: cor),
+            ),
         ],
       ),
     );

@@ -36,9 +36,10 @@ class _ClockWidgetState extends State<ClockWidget> {
 
     return Text(
       formattedTime,
-      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+      style: Theme.of(context).textTheme.displayLarge?.copyWith(
         fontWeight: FontWeight.bold,
         color: SizebayColors.coral,
+        letterSpacing: 1,
       ),
     );
   }
