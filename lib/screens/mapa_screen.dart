@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../services/jornada_service.dart';
 import '../config/theme.dart';
 import '../widgets/status_chip.dart';
+import '../widgets/app_card.dart';
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -175,85 +176,64 @@ class _MapaScreenState extends State<MapaScreen> {
   }
 
   Widget _buildInfoBox() {
-    return Container(
-      margin: const EdgeInsets.all(16),
+    final scheme = Theme.of(context).colorScheme;
+    final captionStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      fontSize: 12,
+      color: scheme.onSurfaceVariant,
+    );
+
+    return Padding(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Distância da Empresa',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: SizebayColors.cinzaMedio,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$_distanciaMetros m',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              StatusChip(
-                color: _dentroDoPermitido
-                    ? SizebayColors.verde
-                    : SizebayColors.laranja,
-                icon: _dentroDoPermitido ? Icons.check_circle : Icons.warning,
-                label: _dentroDoPermitido ? 'Dentro do raio' : 'Fora do raio',
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: SizebayColors.cinzaClaro,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Raio permitido: ${Empresa.raioPermitidoMetros}m',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: SizebayColors.cinzaMedio,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Distância da empresa', style: captionStyle),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$_distanciaMetros m',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                  ],
                 ),
-                Text(
-                  'Localização: ${Empresa.endereco}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: SizebayColors.cinzaMedio,
-                  ),
+                StatusChip(
+                  color: _dentroDoPermitido
+                      ? SizebayColors.verde
+                      : SizebayColors.laranja,
+                  icon: _dentroDoPermitido ? Icons.check_circle : Icons.warning,
+                  label: _dentroDoPermitido ? 'Dentro do raio' : 'Fora do raio',
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.field),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Raio permitido: ${Empresa.raioPermitidoMetros}m',
+                    style: captionStyle,
+                  ),
+                  const SizedBox(height: 2),
+                  Text('Empresa: ${Empresa.endereco}', style: captionStyle),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

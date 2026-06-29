@@ -11,11 +11,6 @@ class SizebayColors {
   static const Color laranja = Color(0xFFFFA726);
   static const Color vermelho = Color(0xFFEF5350);
   static const Color azul = Color(0xFF1E88E5);
-
-  // Neutros legados — em migração para o colorScheme (dark mode).
-  static const Color preto = Color(0xFF000000);
-  static const Color offWhite = Color(0xFFF0F6F7);
-  static const Color cinzaClaro = Color(0xFFF5F5F5);
   static const Color cinzaMedio = Color(0xFF9E9E9E);
 }
 
