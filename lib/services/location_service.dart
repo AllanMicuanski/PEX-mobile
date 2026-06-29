@@ -14,9 +14,8 @@ class LocationService {
         await Geolocator.requestPermission();
       }
       _initialized = true;
-    } catch (e) {
-      // Falha silenciosa na inicialização
-      print('locationService.initialize() warning: $e');
+    } catch (_) {
+      // Falha silenciosa: a permissão é re-checada ao obter a localização
     }
   }
 

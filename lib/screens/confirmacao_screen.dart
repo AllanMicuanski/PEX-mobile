@@ -64,14 +64,14 @@ class _ConfirmacaoScreenState extends State<ConfirmacaoScreen>
                     gradient: LinearGradient(
                       colors: [
                         SizebayColors.coral,
-                        SizebayColors.coral.withOpacity(0.7),
+                        SizebayColors.coral.withValues(alpha: 0.7),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: SizebayColors.coral.withOpacity(0.4),
+                        color: SizebayColors.coral.withValues(alpha: 0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 5),
                       ),
@@ -109,7 +109,7 @@ class _ConfirmacaoScreenState extends State<ConfirmacaoScreen>
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: SizebayColors.coral.withOpacity(0.1),
+                      color: SizebayColors.coral.withValues(alpha: 0.1),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -119,9 +119,13 @@ class _ConfirmacaoScreenState extends State<ConfirmacaoScreen>
                   children: [
                     _buildDetailRow('Horário', horaFormatada),
                     const Divider(height: 24),
-                    _buildDetailRow('Foto', '✓', color: Colors.green),
+                    _buildDetailRow('Foto', '✓', color: SizebayColors.verde),
                     const Divider(height: 24),
-                    _buildDetailRow('Localização', '✓', color: Colors.green),
+                    _buildDetailRow(
+                      'Localização',
+                      '✓',
+                      color: SizebayColors.verde,
+                    ),
                   ],
                 ),
               ),
@@ -137,7 +141,7 @@ class _ConfirmacaoScreenState extends State<ConfirmacaoScreen>
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: SizebayColors.coral.withOpacity(0.3),
+                      color: SizebayColors.coral.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),

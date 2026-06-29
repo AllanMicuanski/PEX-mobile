@@ -75,7 +75,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
               child: ListView.separated(
                 padding: const EdgeInsets.all(12),
                 itemCount: _pontos.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final ponto = _pontos[index];
                   return _buildPontoTile(ponto);
@@ -96,10 +96,10 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       corTipo = SizebayColors.laranja;
       icone = Icons.restaurant;
     } else if (tipo == 'retorno') {
-      corTipo = SizebayColors.azulClaro;
+      corTipo = SizebayColors.azul;
       icone = Icons.logout;
     } else if (tipo == 'saida') {
-      corTipo = Colors.red;
+      corTipo = SizebayColors.vermelho;
       icone = Icons.exit_to_app;
     }
 
@@ -109,7 +109,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: corTipo.withOpacity(0.1),
+            color: corTipo.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -124,7 +124,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: corTipo.withOpacity(0.1),
+            color: corTipo.withValues(alpha: 0.1),
             shape: BoxShape.circle,
             border: Border.all(color: corTipo, width: 2),
           ),
@@ -143,7 +143,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: corTipo.withOpacity(0.2),
+                color: corTipo.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(

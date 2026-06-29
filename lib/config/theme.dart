@@ -14,6 +14,7 @@ class SizebayColors {
   static const Color vermelho = Color(0xFFEF5350);
   static const Color cinzaClaro = Color(0xFFF5F5F5);
   static const Color cinzaMedio = Color(0xFF9E9E9E);
+  static const Color azul = Color(0xFF1E88E5);
 }
 
 // Theme Data

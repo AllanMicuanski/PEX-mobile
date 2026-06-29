@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../config/theme.dart';
 
 class ClockWidget extends StatefulWidget {
   const ClockWidget({super.key});
@@ -37,7 +38,7 @@ class _ClockWidgetState extends State<ClockWidget> {
       formattedTime,
       style: Theme.of(context).textTheme.displayMedium?.copyWith(
         fontWeight: FontWeight.bold,
-        color: Colors.blue[600],
+        color: SizebayColors.coral,
       ),
     );
   }

@@ -7,7 +7,6 @@ import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
 import '../config/theme.dart';
-import '../services/ponto_service.dart' show Empresa;
 import 'confirmacao_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -46,8 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() => _gpsValido = valido);
       }
-    } catch (e) {
-      print('GPS validation error: $e');
+    } catch (_) {
       if (mounted) {
         setState(() => _gpsValido = false);
       }
@@ -75,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleRegistrarPonto() async {
     if (!_gpsValido && !_homeOffice) {
       _mostrarMensagem(
-        '📍 GPS não validado! Você precisa estar a 500m da empresa.',
+        'GPS não validado. Você precisa estar a 500m da empresa.',
         isError: true,
       );
       return;
@@ -111,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensagem),
-        backgroundColor: isError ? Colors.red : SizebayColors.coral,
+        backgroundColor: isError ? SizebayColors.vermelho : SizebayColors.coral,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -169,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: SizebayColors.azulClaro.withOpacity(0.2),
+              color: SizebayColors.azulClaro.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: SizebayColors.azulClaro, width: 2),
             ),
@@ -204,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: SizebayColors.coral.withOpacity(0.1),
+            color: SizebayColors.coral.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -244,10 +242,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() => _homeOffice = value);
                 _verificarGPS();
               },
-              activeColor: SizebayColors.coral,
-              activeTrackColor: SizebayColors.coral.withOpacity(0.3),
+              activeThumbColor: SizebayColors.coral,
+              activeTrackColor: SizebayColors.coral.withValues(alpha: 0.3),
               inactiveThumbColor: SizebayColors.cinzaMedio,
-              inactiveTrackColor: SizebayColors.cinzaMedio.withOpacity(0.2),
+              inactiveTrackColor: SizebayColors.cinzaMedio.withValues(
+                alpha: 0.2,
+              ),
             ),
           ),
         ],
@@ -270,15 +270,16 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: tempoSaida
-                  ? [Colors.red[600]!, Colors.red[400]!]
+                  ? [SizebayColors.vermelho, const Color(0xFFFF8A85)]
                   : [SizebayColors.coral, const Color(0xFFF7663D)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: (tempoSaida ? Colors.red : SizebayColors.coral)
-                    .withOpacity(0.4),
+                color:
+                    (tempoSaida ? SizebayColors.vermelho : SizebayColors.coral)
+                        .withValues(alpha: 0.4),
                 blurRadius: 20,
                 spreadRadius: 4,
                 offset: const Offset(0, 8),
@@ -381,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border.all(color: corBorda, width: 2),
         boxShadow: [
           BoxShadow(
-            color: corBorda.withOpacity(0.1),
+            color: corBorda.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -425,8 +426,8 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            SizebayColors.azulClaro.withOpacity(0.2),
-            SizebayColors.bege.withOpacity(0.1),
+            SizebayColors.azulClaro.withValues(alpha: 0.2),
+            SizebayColors.bege.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -435,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border.all(color: SizebayColors.azulClaro, width: 2),
         boxShadow: [
           BoxShadow(
-            color: SizebayColors.azulClaro.withOpacity(0.1),
+            color: SizebayColors.azulClaro.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -469,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: SizebayColors.coral.withOpacity(0.1),
+              color: SizebayColors.coral.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(

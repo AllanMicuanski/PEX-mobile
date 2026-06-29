@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 
 class GPSIndicator extends StatelessWidget {
   final bool isValid;
@@ -7,21 +8,23 @@ class GPSIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cor = isValid ? SizebayColors.verde : SizebayColors.vermelho;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          Icons.location_on,
-          color: isValid ? Colors.green : Colors.red,
+          isValid ? Icons.location_on : Icons.location_off,
+          color: cor,
           size: 24,
         ),
         const SizedBox(width: 8),
         Text(
-          isValid ? 'GPS OK' : 'GPS ERRO',
+          isValid ? 'GPS validado' : 'Fora do raio permitido',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: isValid ? Colors.green : Colors.red,
+            color: cor,
           ),
         ),
       ],

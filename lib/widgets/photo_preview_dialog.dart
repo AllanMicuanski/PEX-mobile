@@ -49,7 +49,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: SizebayColors.coral.withOpacity(0.3),
+                color: SizebayColors.coral.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),

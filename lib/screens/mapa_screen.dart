@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/jornada_service.dart';
-import '../services/ponto_service.dart';
+import '../config/theme.dart';
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -99,9 +99,9 @@ class _MapaScreenState extends State<MapaScreen> {
                     point: LatLng(Empresa.latitude, Empresa.longitude),
                     radius: Empresa.raioPermitidoMetros.toDouble(),
                     useRadiusInMeter: true,
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: SizebayColors.vermelho.withValues(alpha: 0.1),
                     borderStrokeWidth: 2,
-                    borderColor: Colors.red.withValues(alpha: 0.5),
+                    borderColor: SizebayColors.vermelho.withValues(alpha: 0.5),
                   ),
                 ],
               ),
@@ -116,10 +116,12 @@ class _MapaScreenState extends State<MapaScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.red,
+                        color: SizebayColors.vermelho,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.red.withValues(alpha: 0.4),
+                            color: SizebayColors.vermelho.withValues(
+                              alpha: 0.4,
+                            ),
                             blurRadius: 6,
                             spreadRadius: 1,
                           ),
@@ -144,10 +146,10 @@ class _MapaScreenState extends State<MapaScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.blue,
+                          color: SizebayColors.azul,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withValues(alpha: 0.4),
+                              color: SizebayColors.azul.withValues(alpha: 0.4),
                               blurRadius: 6,
                               spreadRadius: 1,
                             ),
@@ -198,7 +200,10 @@ class _MapaScreenState extends State<MapaScreen> {
                 children: [
                   const Text(
                     'Distância da Empresa',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: SizebayColors.cinzaMedio,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -217,18 +222,22 @@ class _MapaScreenState extends State<MapaScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: _dentroDoPermitido
-                      ? Colors.green[50]
-                      : Colors.orange[50],
+                      ? SizebayColors.verde.withValues(alpha: 0.12)
+                      : SizebayColors.laranja.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _dentroDoPermitido ? Colors.green : Colors.orange,
+                    color: _dentroDoPermitido
+                        ? SizebayColors.verde
+                        : SizebayColors.laranja,
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       _dentroDoPermitido ? Icons.check_circle : Icons.warning,
-                      color: _dentroDoPermitido ? Colors.green : Colors.orange,
+                      color: _dentroDoPermitido
+                          ? SizebayColors.verde
+                          : SizebayColors.laranja,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -238,8 +247,8 @@ class _MapaScreenState extends State<MapaScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: _dentroDoPermitido
-                            ? Colors.green
-                            : Colors.orange,
+                            ? SizebayColors.verde
+                            : SizebayColors.laranja,
                       ),
                     ),
                   ],
@@ -252,7 +261,7 @@ class _MapaScreenState extends State<MapaScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: SizebayColors.cinzaClaro,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -260,11 +269,17 @@ class _MapaScreenState extends State<MapaScreen> {
               children: [
                 Text(
                   'Raio permitido: ${Empresa.raioPermitidoMetros}m',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: SizebayColors.cinzaMedio,
+                  ),
                 ),
                 Text(
                   'Localização: ${Empresa.endereco}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: SizebayColors.cinzaMedio,
+                  ),
                 ),
               ],
             ),
