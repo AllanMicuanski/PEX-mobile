@@ -21,6 +21,7 @@ class SizebayColors {
 ThemeData getSizebayTheme() {
   return ThemeData(
     useMaterial3: true,
+    fontFamily: 'Inter',
     colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: SizebayColors.coral,
