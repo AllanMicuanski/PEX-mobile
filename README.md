@@ -17,22 +17,27 @@ Aplicativo Flutter para registro de ponto de trabalho com captura de localizaç�
 
 ```
 lib/
-├── main.dart                 # App entry point + navegação
+├── main.dart                    # App entry point + navegação
+├── config/
+│   └── theme.dart               # Tema Sizebay (getSizebayTheme)
 ├── models/
-│   └── ponto.dart           # Modelo de dados
+│   └── ponto.dart               # Modelo de dados
 ├── services/
-│   ├── jornada_service.dart # Lógica de negócio (horários, validações)
-│   ├── database_service.dart # Persistência SQLite
-│   ├── location_service.dart # Gerenciamento de GPS
-│   ├── camera_service.dart   # Captura de fotos
-│   └── ponto_service.dart    # Orquestração de registro
+│   ├── jornada_service.dart     # Lógica de negócio (horários, validações)
+│   ├── database_service.dart    # Persistência SQLite
+│   ├── location_service.dart    # Gerenciamento de GPS
+│   ├── camera_service.dart      # Captura de fotos
+│   └── ponto_service.dart       # Orquestração de registro
 ├── screens/
-│   ├── home_screen.dart     # Tela principal + botão de registro
-│   ├── mapa_screen.dart     # Validação GPS com mapa
-│   └── historico_screen.dart # Histórico de registros
+│   ├── home_screen.dart         # Tela principal + botão de registro
+│   ├── mapa_screen.dart         # Validação GPS com mapa
+│   ├── historico_screen.dart    # Histórico de registros
+│   ├── confirmacao_screen.dart  # Confirmação de registro
+│   └── verificacao_screen.dart  # Verificação (foto/dados)
 └── widgets/
-    ├── clock_widget.dart    # Relógio em tempo real
-    └── gps_indicator.dart   # Status do GPS
+    ├── clock_widget.dart        # Relógio em tempo real
+    ├── gps_indicator.dart       # Status do GPS
+    └── photo_preview_dialog.dart # Preview da foto capturada
 ```
 
 ## 🔧 Tecnologias
@@ -117,6 +122,19 @@ A jornada de trabalho é fixa com horários pré-definidos:
 - Lista de registros anteriores
 - Horários com status (on-time/late)
 - Total de horas do dia
+
+## 🧪 Testes
+
+```bash
+flutter test                # Executa todos os testes
+flutter test --coverage     # Executa com cobertura (coverage/lcov.info)
+```
+
+Os testes ficam em `test/`.
+
+## 📄 Licença
+
+Distribuído sob a licença MIT. Veja [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
