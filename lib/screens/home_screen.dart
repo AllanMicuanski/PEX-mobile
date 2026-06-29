@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _estaProcessando = false;
   bool _gpsValido = false;
   bool _homeOffice = false;
+  bool _pressed = false;
   String _horasTrabalhadas = '0h 00min';
 
   @override
@@ -244,62 +245,92 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMainButton() {
     final tempoSaida = JornadaService.isHorarioDeSaida(DateTime.now());
+    final desabilitado = !_gpsValido && !_homeOffice;
+    final habilitado = !_estaProcessando && !desabilitado;
+
+    final corBase = desabilitado
+        ? SizebayColors.cinzaMedio
+        : tempoSaida
+        ? SizebayColors.vermelho
+        : SizebayColors.coral;
+    final gradiente = desabilitado
+        ? [SizebayColors.cinzaMedio, SizebayColors.cinzaMedio]
+        : tempoSaida
+        ? [SizebayColors.vermelho, const Color(0xFFFF8A85)]
+        : [SizebayColors.coral, const Color(0xFFF7663D)];
 
     return Center(
-      child: GestureDetector(
-        onTap: _estaProcessando || (!_gpsValido && !_homeOffice)
-            ? null
-            : _handleRegistrarPonto,
-        child: Container(
-          width: 200,
-          height: 200,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: tempoSaida
-                  ? [SizebayColors.vermelho, const Color(0xFFFF8A85)]
-                  : [SizebayColors.coral, const Color(0xFFF7663D)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    (tempoSaida ? SizebayColors.vermelho : SizebayColors.coral)
-                        .withValues(alpha: 0.4),
-                blurRadius: 20,
-                spreadRadius: 4,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: _estaProcessando
-                ? const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 3,
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        tempoSaida ? Icons.logout : Icons.check_circle_outline,
-                        size: 64,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        tempoSaida ? 'SAÍDA' : 'ENTRADA',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
+      child: Semantics(
+        button: true,
+        enabled: habilitado,
+        label: tempoSaida ? 'Registrar saída' : 'Registrar entrada',
+        child: GestureDetector(
+          onTapDown: habilitado ? (_) => setState(() => _pressed = true) : null,
+          onTapUp: habilitado ? (_) => setState(() => _pressed = false) : null,
+          onTapCancel: habilitado
+              ? () => setState(() => _pressed = false)
+              : null,
+          onTap: habilitado ? _handleRegistrarPonto : null,
+          child: AnimatedScale(
+            scale: _pressed ? 0.95 : 1.0,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: gradiente,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: corBase.withValues(alpha: desabilitado ? 0.2 : 0.4),
+                    blurRadius: 20,
+                    spreadRadius: 4,
+                    offset: const Offset(0, 8),
                   ),
+                ],
+              ),
+              child: Center(
+                child: _estaProcessando
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            desabilitado
+                                ? Icons.lock_outline
+                                : tempoSaida
+                                ? Icons.logout
+                                : Icons.check_circle_outline,
+                            size: 64,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            desabilitado
+                                ? 'INDISPONÍVEL'
+                                : tempoSaida
+                                ? 'SAÍDA'
+                                : 'ENTRADA',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
           ),
         ),
       ),
