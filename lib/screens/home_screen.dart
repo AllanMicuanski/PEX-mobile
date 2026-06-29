@@ -6,6 +6,7 @@ import '../services/location_service.dart';
 import '../services/jornada_service.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/gps_indicator.dart';
+import '../widgets/app_card.dart';
 import '../config/theme.dart';
 import 'confirmacao_screen.dart';
 
@@ -191,23 +192,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeOfficeToggle() {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _homeOffice ? SizebayColors.coral : SizebayColors.bege,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: SizebayColors.coral.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      borderColor: _homeOffice ? SizebayColors.coral : SizebayColors.bege,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -375,19 +362,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: corBorda, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: corBorda.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return AppCard(
+      borderColor: corBorda,
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

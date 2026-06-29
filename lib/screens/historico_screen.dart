@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/ponto.dart';
 import '../services/ponto_service.dart';
 import '../config/theme.dart';
+import '../widgets/app_card.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -103,18 +104,8 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       icone = Icons.exit_to_app;
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: corTipo.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
