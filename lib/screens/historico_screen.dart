@@ -4,6 +4,7 @@ import '../models/ponto.dart';
 import '../services/ponto_service.dart';
 import '../config/theme.dart';
 import '../widgets/app_card.dart';
+import '../widgets/status_chip.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -131,42 +132,12 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         ),
         subtitle: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: corTipo.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                tipo.toUpperCase(),
-                style: TextStyle(
-                  color: corTipo,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    size: 16,
-                    color: SizebayColors.verde,
-                  ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    'Registrado',
-                    style: TextStyle(
-                      color: SizebayColors.verde,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+            StatusChip(color: corTipo, label: tipo.toUpperCase()),
+            const Spacer(),
+            const StatusChip(
+              color: SizebayColors.verde,
+              label: 'Registrado',
+              icon: Icons.check_circle,
             ),
           ],
         ),

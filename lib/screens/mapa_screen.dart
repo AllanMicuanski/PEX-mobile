@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/jornada_service.dart';
 import '../config/theme.dart';
+import '../widgets/status_chip.dart';
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -215,44 +216,12 @@ class _MapaScreenState extends State<MapaScreen> {
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: _dentroDoPermitido
-                      ? SizebayColors.verde.withValues(alpha: 0.12)
-                      : SizebayColors.laranja.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _dentroDoPermitido
-                        ? SizebayColors.verde
-                        : SizebayColors.laranja,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _dentroDoPermitido ? Icons.check_circle : Icons.warning,
-                      color: _dentroDoPermitido
-                          ? SizebayColors.verde
-                          : SizebayColors.laranja,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _dentroDoPermitido ? 'Dentro do\nraio' : 'Fora do\nraio',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: _dentroDoPermitido
-                            ? SizebayColors.verde
-                            : SizebayColors.laranja,
-                      ),
-                    ),
-                  ],
-                ),
+              StatusChip(
+                color: _dentroDoPermitido
+                    ? SizebayColors.verde
+                    : SizebayColors.laranja,
+                icon: _dentroDoPermitido ? Icons.check_circle : Icons.warning,
+                label: _dentroDoPermitido ? 'Dentro do raio' : 'Fora do raio',
               ),
             ],
           ),
