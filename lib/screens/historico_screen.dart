@@ -5,6 +5,7 @@ import '../services/ponto_service.dart';
 import '../config/theme.dart';
 import '../widgets/app_card.dart';
 import '../widgets/status_chip.dart';
+import '../widgets/skeleton_box.dart';
 
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
@@ -28,62 +29,78 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
     setState(() => _carregando = true);
     try {
       final pontos = await _pontoService.buscarHistoricoDePontos();
-      // Ordenar por data descendente
       pontos.sort((a, b) => b.dataHora.compareTo(a.dataHora));
-      setState(() => _pontos = pontos);
+      if (mounted) setState(() => _pontos = pontos);
     } finally {
-      setState(() => _carregando = false);
+      if (mounted) setState(() => _carregando = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SizebayColors.offWhite,
-      appBar: AppBar(
-        title: const Text('Histórico'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Histórico')),
       body: _carregando
-          ? const Center(
-              child: CircularProgressIndicator(color: SizebayColors.coral),
-            )
+          ? _buildSkeleton()
           : _pontos.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 64,
-                    color: SizebayColors.cinzaMedio,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Nenhum registro encontrado',
-                    style: TextStyle(
-                      color: SizebayColors.cinzaMedio,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            )
+          ? _buildEmptyState()
           : RefreshIndicator(
               onRefresh: _carregarHistorico,
-              color: SizebayColors.coral,
               child: ListView.separated(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 itemCount: _pontos.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final ponto = _pontos[index];
-                  return _buildPontoTile(ponto);
-                },
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) =>
+                    _buildPontoTile(_pontos[index]),
               ),
             ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.history, size: 64, color: scheme.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhum registro encontrado',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      itemCount: 7,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => AppCard(
+        child: Row(
+          children: [
+            const SkeletonBox(
+              width: 48,
+              height: 48,
+              borderRadius: BorderRadius.all(Radius.circular(24)),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                SkeletonBox(width: 150, height: 14),
+                SizedBox(height: 10),
+                SkeletonBox(width: 90, height: 12),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -106,41 +123,44 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
     }
 
     return AppCard(
-      padding: EdgeInsets.zero,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: corTipo.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-            border: Border.all(color: corTipo, width: 2),
-          ),
-          child: Center(child: Icon(icone, color: corTipo, size: 24)),
-        ),
-        title: Text(
-          '$data - $hora',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: SizebayColors.preto,
-          ),
-        ),
-        subtitle: Row(
-          children: [
-            StatusChip(color: corTipo, label: tipo.toUpperCase()),
-            const Spacer(),
-            const StatusChip(
-              color: SizebayColors.verde,
-              label: 'Registrado',
-              icon: Icons.check_circle,
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: corTipo.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
+            child: Center(child: Icon(icone, color: corTipo, size: 22)),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$data · $hora',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    StatusChip(color: corTipo, label: tipo.toUpperCase()),
+                    const SizedBox(width: 8),
+                    const StatusChip(
+                      color: SizebayColors.verde,
+                      label: 'Registrado',
+                      icon: Icons.check_circle,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
